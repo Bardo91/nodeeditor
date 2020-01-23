@@ -102,105 +102,105 @@ void
 FlowView::
 contextMenuEvent(QContextMenuEvent *event)
 {
-  if (itemAt(event->pos()))
-  {
-    QGraphicsView::contextMenuEvent(event);
-    return;
-  }
-
-  QMenu modelMenu;
-
-  auto skipText = QStringLiteral("skip me");
-
-  //Add filterbox to the context menu
-  auto *txtBox = new QLineEdit(&modelMenu);
-
-  txtBox->setPlaceholderText(QStringLiteral("Filter"));
-  txtBox->setClearButtonEnabled(true);
-
-  auto *txtBoxAction = new QWidgetAction(&modelMenu);
-  txtBoxAction->setDefaultWidget(txtBox);
-
-  modelMenu.addAction(txtBoxAction);
-
-  //Add result treeview to the context menu
-  auto *treeView = new QTreeWidget(&modelMenu);
-  treeView->header()->close();
-
-  auto *treeViewAction = new QWidgetAction(&modelMenu);
-  treeViewAction->setDefaultWidget(treeView);
-
-  modelMenu.addAction(treeViewAction);
-
-  QMap<QString, QTreeWidgetItem*> topLevelItems;
-  for (auto const &cat : _scene->registry().categories())
-  {
-    auto item = new QTreeWidgetItem(treeView);
-    item->setText(0, cat);
-    item->setData(0, Qt::UserRole, skipText);
-    topLevelItems[cat] = item;
-  }
-
-  for (auto const &assoc : _scene->registry().registeredModelsCategoryAssociation())
-  {
-    auto parent = topLevelItems[assoc.second];
-    auto item   = new QTreeWidgetItem(parent);
-    item->setText(0, assoc.first);
-    item->setData(0, Qt::UserRole, assoc.first);
-  }
-
-  treeView->expandAll();
-
-  connect(treeView, &QTreeWidget::itemClicked, [&](QTreeWidgetItem *item, int)
-  {
-    QString modelName = item->data(0, Qt::UserRole).toString();
-
-    if (modelName == skipText)
+    if (itemAt(event->pos()))
     {
+      QGraphicsView::contextMenuEvent(event);
       return;
     }
 
-    auto type = _scene->registry().create(modelName);
+    QDialog dialog;
+    QHBoxLayout *layout = new QHBoxLayout;
 
-    if (type)
+
+    //Add result treeview to the contxt menu
+    auto *treeView = new QTreeWidget();
+    treeView->header()->close();
+    layout->addWidget(treeView);
+
+
+    QVBoxLayout *rightColumn = new QVBoxLayout;
+    QTextBrowser *nodeDescription = new QTextBrowser;
+    nodeDescription->setMaximumWidth(250);
+    nodeDescription->setMaximumHeight(250);
+    nodeDescription->setEnabled(false);
+    nodeDescription->setText("Brief description of node");
+    rightColumn->addWidget(nodeDescription, 0, Qt::AlignTop);
+
+    QHBoxLayout *buttonLayout = new QHBoxLayout;
+    QPushButton *okButton = new QPushButton("Create");
+    QPushButton *cancelButton = new QPushButton("Cancel");
+    buttonLayout->addWidget(okButton);
+    buttonLayout->addWidget(cancelButton);
+    rightColumn->addLayout(buttonLayout);
+
+    layout->addLayout(rightColumn);
+
+    dialog.setLayout(layout);
+    auto skipText = QStringLiteral("skip me");
+
+    QMap<QString, QTreeWidgetItem*> topLevelItems;
+    for (auto const &cat : _scene->registry().categories())
     {
-      auto& node = _scene->createNode(std::move(type));
-
-      QPoint pos = event->pos();
-
-      QPointF posView = this->mapToScene(pos);
-
-      node.nodeGraphicsObject().setPos(posView);
-
-      _scene->nodePlaced(node);
+      auto item = new QTreeWidgetItem(treeView);
+      item->setText(0, cat);
+      item->setData(0, Qt::UserRole, skipText);
+      topLevelItems[cat] = item;
     }
-    else
+
+    for (auto const &assoc : _scene->registry().registeredModelsCategoryAssociation())
     {
-      qDebug() << "Model not found";
+      auto parent = topLevelItems[assoc.second];
+      auto item   = new QTreeWidgetItem(parent);
+      item->setText(0, assoc.first);
+      item->setData(0, Qt::UserRole, assoc.first);
     }
 
-    modelMenu.close();
-  });
+    treeView->expandAll();
 
-  //Setup filtering
-  connect(txtBox, &QLineEdit::textChanged, [&](const QString &text)
-  {
-    for (auto& topLvlItem : topLevelItems)
+    QString modelName = skipText;
+
+    connect(treeView, &QTreeWidget::itemClicked, [&](QTreeWidgetItem *item, int)
     {
-      for (int i = 0; i < topLvlItem->childCount(); ++i)
+      modelName = item->data(0, Qt::UserRole).toString();
+    });
+
+
+    connect(cancelButton, &QPushButton::clicked, [&]{
+      dialog.close();
+    });
+
+    connect(okButton, &QPushButton::clicked, [&]{
+      if (modelName == skipText)
       {
-        auto child = topLvlItem->child(i);
-        auto modelName = child->data(0, Qt::UserRole).toString();
-        const bool match = (modelName.contains(text, Qt::CaseInsensitive));
-        child->setHidden(!match);
+        return;
       }
-    }
-  });
 
-  // make sure the text box gets focus so the user doesn't have to click on it
-  txtBox->setFocus();
+      auto type = _scene->registry().create(modelName);
 
-  modelMenu.exec(event->globalPos());
+      if (type)
+      {
+        auto& node = _scene->createNode(std::move(type));
+
+        QPoint pos = event->pos();
+
+        QPointF posView = this->mapToScene(pos);
+
+        node.nodeGraphicsObject().setPos(posView);
+
+        _scene->nodePlaced(node);
+      }
+      else
+      {
+        qDebug() << "Model not found";
+      }
+
+      dialog.close();
+    });
+
+
+
+    dialog.move(event->globalPos());
+    dialog.exec();
 }
 
 
