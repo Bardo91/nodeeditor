@@ -43,6 +43,11 @@ public:
   virtual QString
   caption() const = 0;
 
+  /// Description
+  virtual QString
+  description() const {return "None description.";};
+
+
   /// It is possible to hide caption in GUI
   virtual bool
   captionVisible() const { return true; }

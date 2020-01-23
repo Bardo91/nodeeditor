@@ -122,7 +122,7 @@ contextMenuEvent(QContextMenuEvent *event)
     QTextBrowser *nodeDescription = new QTextBrowser;
     nodeDescription->setMaximumWidth(250);
     nodeDescription->setMaximumHeight(250);
-    nodeDescription->setEnabled(false);
+    nodeDescription->setReadOnly(true);
     nodeDescription->setText("Brief description of node");
     rightColumn->addWidget(nodeDescription, 0, Qt::AlignTop);
 
@@ -162,6 +162,11 @@ contextMenuEvent(QContextMenuEvent *event)
     connect(treeView, &QTreeWidget::itemClicked, [&](QTreeWidgetItem *item, int)
     {
       modelName = item->data(0, Qt::UserRole).toString();
+      if (modelName == skipText) {
+        return;
+      }
+      auto type = _scene->registry().create(modelName);
+      nodeDescription->setText(type->description());
     });
 
 
