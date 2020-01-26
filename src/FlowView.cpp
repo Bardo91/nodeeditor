@@ -162,17 +162,29 @@ contextMenuEvent(QContextMenuEvent *event)
 
     QString modelName = skipText;
 
+    QBoxLayout *currentConfigLayout = nullptr;
     connect(treeView, &QTreeWidget::itemClicked, [&](QTreeWidgetItem *item, int)
     {
       modelName = item->data(0, Qt::UserRole).toString();
       if (modelName == skipText) {
         return;
       }
+
       auto type = _scene->registry().create(modelName);
       nodeDescription->setText(type->description());
-      if(type->creationWidget() != nullptr)
-        configGroup->setLayout(type->creationWidget());
-        
+      
+      configGroup->setVisible(false);
+      delete configGroup;
+      configGroup = new QGroupBox("Configuration");
+      rightColumn->addWidget(configGroup);
+
+      currentConfigLayout = type->creationWidget();
+      if(currentConfigLayout != nullptr){
+        configGroup->setLayout(currentConfigLayout);
+      }
+      else{
+      }
+      
     });
 
 
