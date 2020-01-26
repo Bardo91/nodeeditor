@@ -2,6 +2,7 @@
 
 
 #include <QtWidgets/QWidget>
+#include <QBoxLayout>
 
 #include "PortType.hpp"
 #include "NodeData.hpp"
@@ -44,8 +45,9 @@ public:
   caption() const = 0;
 
   /// Description
-  virtual QString
-  description() const {return "None description.";};
+  virtual QString description() const {return "None description.";};
+
+  virtual QBoxLayout * creationWidget() const { return nullptr;};
 
 
   /// It is possible to hide caption in GUI

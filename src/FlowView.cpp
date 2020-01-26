@@ -126,6 +126,9 @@ contextMenuEvent(QContextMenuEvent *event)
     nodeDescription->setText("Brief description of node");
     rightColumn->addWidget(nodeDescription, 0, Qt::AlignTop);
 
+    QGroupBox *configGroup = new QGroupBox("Configuration");
+    rightColumn->addWidget(configGroup);
+
     QHBoxLayout *buttonLayout = new QHBoxLayout;
     QPushButton *okButton = new QPushButton("Create");
     QPushButton *cancelButton = new QPushButton("Cancel");
@@ -167,6 +170,9 @@ contextMenuEvent(QContextMenuEvent *event)
       }
       auto type = _scene->registry().create(modelName);
       nodeDescription->setText(type->description());
+      if(type->creationWidget() != nullptr)
+        configGroup->setLayout(type->creationWidget());
+        
     });
 
 
