@@ -161,24 +161,23 @@ contextMenuEvent(QContextMenuEvent *event)
     treeView->expandAll();
 
     QString modelName = skipText;
-
+    std::unique_ptr<NodeDataModel> typeNode;
     QBoxLayout *currentConfigLayout = nullptr;
-    connect(treeView, &QTreeWidget::itemClicked, [&](QTreeWidgetItem *item, int)
-    {
+    connect(treeView, &QTreeWidget::itemClicked, [&](QTreeWidgetItem *item, int) {
       modelName = item->data(0, Qt::UserRole).toString();
       if (modelName == skipText) {
         return;
       }
 
-      auto type = _scene->registry().create(modelName);
-      nodeDescription->setText(type->description());
+      typeNode = _scene->registry().create(modelName);
+      nodeDescription->setText(typeNode->description());
       
       configGroup->setVisible(false);
       delete configGroup;
       configGroup = new QGroupBox("Configuration");
       rightColumn->addWidget(configGroup);
 
-      currentConfigLayout = type->creationWidget();
+      currentConfigLayout = typeNode->creationWidget();
       if(currentConfigLayout != nullptr){
         configGroup->setLayout(currentConfigLayout);
       }
@@ -193,16 +192,12 @@ contextMenuEvent(QContextMenuEvent *event)
     });
 
     connect(okButton, &QPushButton::clicked, [&]{
-      if (modelName == skipText)
-      {
+      if (modelName == skipText) {
         return;
       }
 
-      auto type = _scene->registry().create(modelName);
-
-      if (type)
-      {
-        auto& node = _scene->createNode(std::move(type));
+      if (typeNode) {
+        auto& node = _scene->createNode(std::move(typeNode));
 
         QPoint pos = event->pos();
 
@@ -212,8 +207,7 @@ contextMenuEvent(QContextMenuEvent *event)
 
         _scene->nodePlaced(node);
       }
-      else
-      {
+      else {
         qDebug() << "Model not found";
       }
 
