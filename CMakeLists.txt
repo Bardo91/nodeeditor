@@ -88,7 +88,7 @@ target_include_directories(nodes
 )
 
 target_link_libraries(nodes
-  PUBLIC
+  LINK_PUBLIC
     Qt5::Core
     Qt5::Widgets
     Qt5::Gui
@@ -158,32 +158,30 @@ endif()
 # Installation
 ##
 
-include(GNUInstallDirs)
-
-set(INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/NodeEditor)
+# include(GNUInstallDirs)
 
 install(TARGETS nodes
   EXPORT NodeEditorTargets
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
 )
 
-install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_PREFIX})
 
 install(EXPORT NodeEditorTargets
   FILE NodeEditorTargets.cmake
   NAMESPACE NodeEditor::
-  DESTINATION ${INSTALL_CONFIGDIR}
+  DESTINATION lib/cmake/${PROJECT_NAME}
 )
 
 include(CMakePackageConfigHelpers)
 
 configure_package_config_file(${CMAKE_CURRENT_LIST_DIR}/cmake/NodeEditorConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/NodeEditorConfig.cmake
-  INSTALL_DESTINATION ${INSTALL_CONFIGDIR}
+  INSTALL_DESTINATION lib/cmake/${PROJECT_NAME}
 )
 
 install(FILES
   ${CMAKE_CURRENT_BINARY_DIR}/NodeEditorConfig.cmake
-  DESTINATION ${INSTALL_CONFIGDIR}
+  DESTINATION lib/cmake/${PROJECT_NAME}
 )
