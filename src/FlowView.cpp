@@ -184,7 +184,7 @@ contextMenuEvent(QContextMenuEvent *event)
       QLabel *pIconLabel = new QLabel();
       QLabel *pTextLabel = new QLabel();
 
-      pIconLabel->setPixmap(QIcon("/usr/share/icons/Humanity/actions/64/help-contents.svg").pixmap(QSize(32, 32)));
+      pIconLabel->setPixmap(_scene->registry().create(assoc.first)->icon().pixmap(QSize(32, 32)));
       pIconLabel->setAlignment(Qt::AlignCenter);
       pIconLabel->setMouseTracking(false);
       pIconLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
