@@ -7,6 +7,7 @@
 namespace QtNodes
 {
 
+
 class FlowScene;
 
 class NODE_EDITOR_PUBLIC FlowView
