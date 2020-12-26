@@ -50,7 +50,7 @@ public:
 
   virtual QBoxLayout * creationWidget() const { return nullptr;};
 
-  virtual QIcon icon() const { return QIcon("/usr/share/icons/Humanity/actions/64/help-contents.svg"); }
+  virtual QIcon icon() const { return QIcon(/*(Persistency::resourceDir()+"question.svg").c_str()*/); }
 
   /// It is possible to hide caption in GUI
   virtual bool
