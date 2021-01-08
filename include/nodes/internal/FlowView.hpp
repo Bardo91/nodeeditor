@@ -66,5 +66,6 @@ private:
   QPointF _clickPos;
 
   FlowScene* _scene;
+  QString lastCategory_="";
 };
 }

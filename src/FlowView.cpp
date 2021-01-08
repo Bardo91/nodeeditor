@@ -235,7 +235,14 @@ contextMenuEvent(QContextMenuEvent *event)
     }
 
     // treeView->expandAll();
-
+    if (lastCategory_ != "") {
+        for (unsigned i = 0; i < nodeTypeSelector->count(); i++) {
+            if (nodeTypeSelector->itemText(i) == lastCategory_) {
+                nodeTypeSelector->setCurrentIndex(i);
+                break;
+            }
+        }
+    }
 
     connect(cancelButton, &QPushButton::clicked, [&]{
       dialog.close();
@@ -256,6 +263,8 @@ contextMenuEvent(QContextMenuEvent *event)
         node.nodeGraphicsObject().setPos(posView);
 
         _scene->nodePlaced(node);
+
+        lastCategory_ = nodeTypeSelector->itemText(nodeTypeSelector->currentIndex());
       }
       else {
         qDebug() << "Model not found";
