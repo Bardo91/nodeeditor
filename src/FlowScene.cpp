@@ -505,10 +505,13 @@ load()
   //-------------
 
   QString fileName =
-    QFileDialog::getOpenFileName(nullptr,
-                                 tr("Open Flow Scene"),
-                                 QDir::homePath(),
-                                 tr("Flow Scene Files (*.flow)"));
+    QFileDialog::getOpenFileName(   nullptr,
+                                    tr("Open Flow Scene"),
+                                    QDir::homePath(),
+                                    tr("Flow Scene Files (*.flow)"),
+                                    0,
+                                    QFileDialog::DontUseNativeDialog);  // 666 Crashing for some reason in Windows, not using native prevents it.
+                                                                        // https://stackoverflow.com/questions/46473310/qtqfiledialog-crashes-my-application-when-called-a-second-time
 
   if (!QFileInfo::exists(fileName))
     return;
