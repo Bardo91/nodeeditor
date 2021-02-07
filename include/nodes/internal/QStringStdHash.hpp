@@ -4,7 +4,11 @@
 
 #include <QtCore/QString>
 #include <QtCore/QVariant>
-/*
+
+
+
+#if defined(_WIN32)
+
 namespace std
 {
 template<>
@@ -16,4 +20,5 @@ struct hash<QString>
     return qHash(s);
   }
 };
-}*/
+}
+#endif
