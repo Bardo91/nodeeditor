@@ -480,7 +480,7 @@ save() const
     QFileDialog::getSaveFileName(nullptr,
                                  tr("Open Flow Scene"),
                                  QDir::homePath(),
-                                 tr("Flow Scene Files (*.flow)"));
+                                 tr("Flow Scene Files (*.flow)"), Q_NULLPTR, QFileDialog::DontUseNativeDialog);
 
   if (!fileName.isEmpty())
   {
