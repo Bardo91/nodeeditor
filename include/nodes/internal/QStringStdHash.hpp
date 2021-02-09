@@ -7,7 +7,7 @@
 
 
 
-#if defined(_WIN32)
+// #if defined(_WIN32)
 
 namespace std
 {
@@ -21,4 +21,4 @@ struct hash<QString>
   }
 };
 }
-#endif
+// #endif
