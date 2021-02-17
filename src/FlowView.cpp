@@ -150,88 +150,89 @@ contextMenuEvent(QContextMenuEvent *event)
     dialog.setLayout(layout);
     auto skipText = QStringLiteral("skip me");
 
+
+    QBoxLayout* currentConfigLayout = nullptr;
+    QString modelName = skipText;
+    std::unique_ptr<NodeDataModel> typeNode;
+
     // QMap<QString, QTreeWidgetItem*> topLevelItems;
-    QMap<QString, QGridLayout*> topLevelItems;
+    QMap<QString, QListWidget*> topLevelItems;
     for (auto const &cat : _scene->registry().categories())
     {
       //
-      auto grid = new QGridLayout();
-      QWidget *wgt = new QWidget();
-      wgt->setLayout(grid);
-      nodeTypeSelector->addItem(wgt, cat);
+      auto grid = new QListWidget();
+      grid->setViewMode(QListWidget::IconMode);
+      grid->setIconSize(QSize(100, 100));
+      grid->setResizeMode(QListWidget::Adjust);
+
+      nodeTypeSelector->addItem(grid, cat);
       topLevelItems[cat] = grid;
-      //
-      // auto item = new QTreeWidgetItem(treeView);
-      // item->setText(0, cat);
-      // item->setData(0, Qt::UserRole, skipText);
-      // topLevelItems[cat] = item;
-      //
+
+
+      connect(grid, &QListWidget::itemClicked, [&](QListWidgetItem* item) {
+          modelName = item->text();
+          if (modelName == skipText)
+              return;
+
+          typeNode = _scene->registry().create(modelName);
+          nodeDescription->setText(typeNode->description());
+
+          configGroup->setVisible(false);
+          delete configGroup;
+          configGroup = new QGroupBox("Configuration");
+          rightColumn->addWidget(configGroup);
+
+          currentConfigLayout = typeNode->creationWidget();
+          if (currentConfigLayout != nullptr) {
+              configGroup->setLayout(currentConfigLayout);
+          }
+          else {
+          }
+
+      });
+
     }
 
 
-    QString modelName = skipText;
-    std::unique_ptr<NodeDataModel> typeNode;
-    QBoxLayout *currentConfigLayout = nullptr;
-    for (auto const &assoc : _scene->registry().registeredModelsCategoryAssociation()) {
-      // auto parent = topLevelItems[assoc.second];
-      // auto item   = new QTreeWidgetItem(parent);
-      // item->setText(0, assoc.first);
-      // item->setData(0, Qt::UserRole, assoc.first);
-      auto parent = topLevelItems[assoc.second];
+    for (auto const& assoc : _scene->registry().registeredModelsCategoryAssociation()) {
+        // auto parent = topLevelItems[assoc.second];
+        // auto item   = new QTreeWidgetItem(parent);
+        // item->setText(0, assoc.first);
+        // item->setData(0, Qt::UserRole, assoc.first);
+        auto parent = topLevelItems[assoc.second];
 
-      auto item   = new QToolButton();
-      QVBoxLayout *pLayout = new QVBoxLayout();
-      QLabel *pIconLabel = new QLabel();
-      QLabel *pTextLabel = new QLabel();
+        auto item = new QListWidgetItem(_scene->registry().create(assoc.first)->icon(), assoc.first, parent);
+        parent->addItem(item);
+        // QVBoxLayout *pLayout = new QVBoxLayout();
+        // QLabel *pIconLabel = new QLabel();
+        // QLabel *pTextLabel = new QLabel();
 
-      pIconLabel->setPixmap(_scene->registry().create(assoc.first)->icon().pixmap(QSize(32, 32)));
-      pIconLabel->setAlignment(Qt::AlignCenter);
-      pIconLabel->setMouseTracking(false);
-      pIconLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        // pIconLabel->setPixmap(_scene->registry().create(assoc.first)->icon().pixmap(QSize(32, 32)));
+        // pIconLabel->setAlignment(Qt::AlignCenter);
+        // pIconLabel->setMouseTracking(false);
+        // pIconLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-      pTextLabel->setText(assoc.first);
-      pTextLabel->setAlignment(Qt::AlignCenter);
-      pTextLabel->setWordWrap(true);
-      pTextLabel->setTextInteractionFlags(Qt::NoTextInteraction);
-      pTextLabel->setMouseTracking(false);
-      pTextLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        // pTextLabel->setText(assoc.first);
+        // pTextLabel->setAlignment(Qt::AlignCenter);
+        // pTextLabel->setWordWrap(true);
+        // pTextLabel->setTextInteractionFlags(Qt::NoTextInteraction);
+        // pTextLabel->setMouseTracking(false);
+        // pTextLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-      pLayout->addWidget(pIconLabel);
-      pLayout->addWidget(pTextLabel);
-      pLayout->setSpacing(5);
-      pLayout->setMargin(0);
-      pLayout->setContentsMargins(5, 5, 5, 5);
+        // pLayout->addWidget(pIconLabel);
+        // pLayout->addWidget(pTextLabel);
+        // pLayout->setSpacing(5);
+        // pLayout->setMargin(0);
+        // pLayout->setContentsMargins(5, 5, 5, 5);
 
-      item->setText("");
-      item->setLayout(pLayout);
-      item->setMinimumWidth(100);
-      item->setMinimumHeight(100);
-      
-      // std::cout << assoc.first.toStdString() << parent->count()/3 << ", " << parent->count()%3 << std::endl;
-      parent->addWidget(item, parent->count()/3, parent->count()%3 );
+        // item->setText("");
+        // item->setLayout(pLayout);
+        // item->setMinimumWidth(100);
+        // item->setMinimumHeight(100);
 
-      connect(item, &QPushButton::clicked, std::bind([&](const QString& text) {
-        modelName = text;
-        if (modelName == skipText) {
-          return;
-        }
+        // std::cout << assoc.first.toStdString() << parent->count()/3 << ", " << parent->count()%3 << std::endl;
+        // parent->addWidget(item, parent->count()/3, parent->count()%3 );
 
-        typeNode = _scene->registry().create(modelName);
-        nodeDescription->setText(typeNode->description());
-        
-        configGroup->setVisible(false);
-        delete configGroup;
-        configGroup = new QGroupBox("Configuration");
-        rightColumn->addWidget(configGroup);
-
-        currentConfigLayout = typeNode->creationWidget();
-        if(currentConfigLayout != nullptr){
-          configGroup->setLayout(currentConfigLayout);
-        }
-        else{
-        }
-        
-      }, assoc.first));
     }
 
     // treeView->expandAll();
